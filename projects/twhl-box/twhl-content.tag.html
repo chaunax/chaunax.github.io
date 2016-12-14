@@ -1,0 +1,111 @@
+<twhl-base>
+  <div>
+    <table>
+      <tr><td>Thickness</td><td><input ref='thickness' onblur={recalc} value='5' /> mm</td></tr>
+      <tr><td>Width</td><td><input ref='width' onblur={recalc} value='50' /> mm</td></tr>
+      <tr><td>Height</td><td><input ref='height' onblur={recalc} value='20' /> mm</td></tr>
+      <tr><td>Length</td><td><input ref='len' onblur={recalc} value='30' /> mm</td></tr>
+      <tr><td>Spacing</td><td><input ref='spacing' onblur={recalc} value='3.175' /> mm</td></tr>
+    </table>
+  </div>
+  
+  <div id='content'></div>
+  
+  <script>
+    this.on('mount', function(){
+      this.recalc();
+    })
+    
+    this.recalc = function(){
+      riot.mount('#content','twhl-content', {
+        thickness: this.refs.thickness.value,
+        width: this.refs.width.value,
+        height: this.refs.height.value,
+        len: this.refs.len.value,
+        spacing: this.refs.spacing.value
+      })
+    }
+    
+  </script>
+</twhl-base>
+
+
+<twhl-content>
+  <a id='dl' href='#' download="box.svg" onclick="document.getElementById('dl').href='data:image/svg+xml;utf8,' + unescape(document.getElementById('twhl-plan').innerHTML)">Download</a>
+  <div id='twhl-plan'>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000mm" height="1000mm">
+      <style> rect {stroke:#000; fill:#fff;} </style>
+      <rect x={side.x1} y={side.y1} height={side.h} width={side.w}/>
+
+      <rect x={top_outline.x1} y={top_outline.y1} height={top_outline.h} width={top_outline.w}/>
+      <rect x={top_body.x1} y={top_body.y1} height={top_body.h} width={top_body.w}/>
+    
+      <rect x={front_outline.x1} y={front_outline.y1} height={front_outline.h} width={front_outline.w}/>
+      <rect x={front_body.x1} y={front_body.y1} height={front_body.h} width={front_body.w}/>
+
+      <rect x={side.x2} y={side.y2} height={side.h} width={side.w}/>
+
+      <rect x={top_outline.x2} y={top_outline.y2} height={top_outline.h} width={top_outline.w}/>
+      <rect x={top_body.x2} y={top_body.y2} height={top_body.h} width={top_body.w}/>
+    
+      <rect x={front_outline.x2} y={front_outline.y2} height={front_outline.h} width={front_outline.w}/>
+      <rect x={front_body.x2} y={front_body.y2} height={front_body.h} width={front_body.w}/>
+    </svg>
+  </div>
+  
+  <script>
+    var spacer = parseInt(opts.spacing) || 3.175;
+    var t = parseInt(opts.thickness) || 5;
+    var w = parseInt(opts.width) || 30;
+    var h = parseInt(opts.height) || 20;
+    var l = parseInt(opts.len) || 40;
+    
+    this.side = {
+      x1: spacer + 'mm', 
+      y1: spacer + 'mm', 
+      x2: spacer + 'mm', 
+      y2: spacer + l + (spacer-t) + 'mm', 
+      h: l-(t) + 'mm', 
+      w: h + 'mm'
+    }
+
+    this.top_outline = {
+      x1: (spacer + mmx(this.side.w) + spacer) + 'mm',
+      y1: spacer + 'mm', 
+      x2: (spacer + mmx(this.side.w) + spacer + spacer + w) + 'mm',
+      y2: spacer + 'mm', 
+      h: l + 'mm', 
+      w: w + 'mm'
+    };
+    
+    this.top_body = {
+      x1: mmx(this.top_outline.x1) + t + 'mm',
+      y1: mmx(this.top_outline.y1) + t + 'mm', 
+      x2: mmx(this.top_outline.x1) + spacer + w + t + 'mm',
+      y2: mmx(this.top_outline.y1) + t + 'mm', 
+      h: l-(t*2) + 'mm', 
+      w: w-(t*2) + 'mm'
+    };
+
+    this.front_outline = {
+      x1: this.top_outline.x1,
+      y1: (mmx(this.top_outline.y1) + mmx(this.top_outline.h) + spacer) + 'mm', 
+      x2: mmx(this.top_outline.x1) + spacer + w + 'mm',
+      y2: (mmx(this.top_outline.y1) + mmx(this.top_outline.h) + spacer) + 'mm', 
+      h:h + 'mm', 
+      w:w + 'mm'
+    };
+    this.front_body = {
+      x1: this.top_body.x1,
+      y1: this.front_outline.y1, 
+      x2: mmx(this.top_body.x1) + spacer + w + 'mm',
+      y2: this.front_outline.y1, 
+      h:h + 'mm', 
+      w:w-(t*2) + 'mm'
+    };
+    
+    function mmx(measure){
+      return parseInt(measure.replace('mm'));
+    }
+  </script>
+</twhl-content>
