@@ -1,0 +1,138 @@
+<twhl-base>
+  <div id='params'>
+    <h1>twhl-box</h1>
+    <table>
+      <tr><td>Thickness</td><td><input ref='thickness' onblur={recalc} value='5' /> mm</td></tr>
+      <tr><td>Width</td><td><input ref='width' onblur={recalc} value='70' /> mm</td></tr>
+      <tr><td>Height</td><td><input ref='height' onblur={recalc} value='20' /> mm</td></tr>
+      <tr><td>Length</td><td><input ref='len' onblur={recalc} value='40' /> mm</td></tr>
+      <tr><td>Spacing</td><td><input ref='spacing' onblur={recalc} value='4' /> mm</td></tr>
+    </table>
+    <br/>
+    This tool generates sides for a box using rabbet joints, based on your dimensions. <br/><br/> It creates a <a href='http://carbide3d.com/downloads/'>Carbide Create</a> c2d file for your Shapeoko3, complete with toolpaths. Click the &quot;Download C2D&quot; link, and open it in Carbide Create.  
+  </div>
+ 
+  <div id='content'></div>
+  
+  <script>
+    this.on('mount', function(){
+      this.recalc();
+    })
+    
+    this.recalc = function(){
+      riot.mount('#content','twhl-content', {
+        thickness: this.refs.thickness.value,
+        width: this.refs.width.value,
+        height: this.refs.height.value,
+        len: this.refs.len.value,
+        spacing: this.refs.spacing.value
+      })
+    }
+    
+  </script>
+</twhl-base>
+
+
+<twhl-content>
+  <a id='dlc2d' href='{c2d}' download="box.c2d">Download C2D</a><br/>
+  <div id='twhl-plan'>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="300mm" height="300mm">
+      <style> rect {stroke:#000; fill-opacity: 0} </style>
+			<rect each={plan} x={x} y={y} height={h} width={w}></rect>
+    </svg>
+  </div>
+  <a id='dlsvg' href='#' download="box.svg" onclick="document.getElementById('dlsvg').href='data:image/svg+xml;utf8,' + unescape(document.getElementById('twhl-plan').innerHTML)">Download SVG</a>
+  
+  <script>
+    function mmx(measure){
+      return parseInt(measure.replace('mm'));
+    }
+
+    var spacer = parseInt(opts.spacing) || 4;
+    var s2 = spacer / 2;
+    var t = parseInt(opts.thickness) || 5;
+    var w = parseInt(opts.width) || 30;
+    var h = parseInt(opts.height) || 20;
+    var l = parseInt(opts.len) || 40;
+    
+    this.side = {
+      x1: spacer + 'mm', 
+      y1: spacer + 'mm', 
+      x2: spacer + 'mm', 
+      y2: spacer + l + (spacer-t) + 'mm', 
+      h: l-(t) + 'mm', 
+      w: h + 'mm'
+    }
+
+		this.top = {
+      x1: (spacer + mmx(this.side.w) + spacer) + 'mm',
+      y1: spacer + 'mm', 
+      x2: (spacer + mmx(this.side.w) + spacer + spacer + w) + 'mm',
+      y2: spacer + 'mm', 
+      h: l + 'mm', 
+      w: w + 'mm'
+    };
+    
+ 		this.top_body = {
+			x1: mmx(this.top.x1) + t + 'mm',
+			y1: mmx(this.top.y1) + t + 'mm', 
+			x2: mmx(this.top.x1) + spacer + w + t + 'mm',
+			y2: mmx(this.top.y1) + t + 'mm', 
+			h: l-(t*2) + 'mm', 
+			w: w-(t*2) + 'mm'
+		};
+
+    this.front = {
+      x1: this.top.x1,
+      x2: mmx(this.top.x1) + spacer + w + 'mm',
+      y: (mmx(this.top.y1) + mmx(this.top.h) + spacer) + 'mm', 
+      h: h + 'mm', 
+      w: w + 'mm'
+    };
+    
+    this.rabbettop = {
+      x1: mmx(this.top.x1) - s2 + 'mm',
+      x2: mmx(this.top.x2) - s2 + 'mm',
+      y: s2 + 'mm',
+      h: mmx(this.top.h) + spacer + 'mm',
+      w: mmx(this.top.w) + spacer + 'mm'
+    }
+
+    this.rabbetfront = {
+      x1: this.front.x1,
+      x2: mmx(this.front.x1) + mmx(this.front.w) - t + 'mm',
+      x3: this.front.x2,
+      x4: mmx(this.front.x2) + mmx(this.front.w) - t + 'mm',
+      y: mmx(this.front.y) - s2 + 'mm',
+      h: mmx(this.front.h) + spacer + 'mm',
+      w: t + 'mm',
+    }
+
+		this.plan = [
+			{i: 100, x: this.top.x1, y: this.top.y1, h: this.top.h, w: this.top.w},
+			{i: 150, x: this.top.x2, y: this.top.y2, h: this.top.h, w: this.top.w},
+			{i: 101, x: this.top_body.x1, y: this.top_body.y1, h: this.top_body.h, w: this.top_body.w},
+			{i: 151, x: this.top_body.x2, y: this.top_body.y2, h: this.top_body.h, w: this.top_body.w},
+
+			{i: 102, x: this.rabbettop.x1, y: this.rabbettop.y, h: this.rabbettop.h, w: this.rabbettop.w},
+			{i: 152, x: this.rabbettop.x2, y: this.rabbettop.y, h: this.rabbettop.h, w: this.rabbettop.w},
+
+			{i: 200, x: this.front.x1, y: this.front.y, h: this.front.h, w: this.front.w},
+			{i: 250, x: this.front.x2, y: this.front.y, h: this.front.h, w: this.front.w},
+
+			{i: 201, x: this.rabbetfront.x1, y: this.rabbetfront.y, h: this.rabbetfront.h, w: this.rabbetfront.w},
+			{i: 202, x: this.rabbetfront.x2, y: this.rabbetfront.y, h: this.rabbetfront.h, w: this.rabbetfront.w},
+			{i: 251, x: this.rabbetfront.x3, y: this.rabbetfront.y, h: this.rabbetfront.h, w: this.rabbetfront.w},
+			{i: 252, x: this.rabbetfront.x4, y: this.rabbetfront.y, h: this.rabbetfront.h, w: this.rabbetfront.w},
+
+			{i: 300, x: this.side.x1, y: this.side.y1, h: this.side.h, w: this.side.w},
+			{i: 350, x: this.side.x2, y: this.side.y2, h: this.side.h, w: this.side.w}
+		];
+
+    this.c2d = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(twhl.generateC2D(this.plan, t)));
+  </script>
+  <style>
+    #dlc2d {font-size: 20px;}
+    #dlsvg {font-size: 10px;}
+  </style>
+</twhl-content>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <script src='https://cdn.jsdelivr.net/riot/3.0/riot+compiler.js'></script>
+    <!-- <script src='https://cdn.jsdelivr.net/npm/riot@3.8/riot+compiler.min.js'></script> -->
+    <script src="twhl-content-rabbet.tag.html" type="riot/tag"></script>
+    <link href="https://fonts.googleapis.com/css?family=Hind" rel="stylesheet"> 
+    <style>
+      body, h1 {font-family: "Hind"}
+      h1 {margin: 2px; padding: 0px; color: #849260;}
+      input {width: 60px; border: solid 1px #cccccc; padding: 4px; font-size: 20px; text-align:right;}
+      #params {float: left; background-color: #F0F9DB; padding: 10px; width:200px;}
+      #content {float: left; padding-left: 20px;}
+    </style>
+  </head>
+
+  <body>
+    <twhl-base></twhl-base>
+    
+    <script src='twhl.js'></script>
+    <script>
+      riot.mount('*');
+    </script>
+  </body>
+
+</html>
